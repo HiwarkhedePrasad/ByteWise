@@ -1,65 +1,88 @@
-# bytewise README
+---
+# ByteWise VS Code Extension
 
-This is the README for your extension "bytewise". After writing up a brief description, we recommend including the following sections.
+ByteWise is a VS Code extension designed to help C/C++ developers understand and optimize the memory layout of their `struct`s. It provides insights into struct sizing, padding, and potential memory savings through reordering.
+---
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+- **Struct Analysis**: Analyze `struct` definitions in your C/C++ code to visualize their memory layout, including individual field sizes, padding, and total struct size.
+- **Selection Analysis**: Analyze only a selected portion of your code for `struct` definitions.
+- **File Analysis**: Analyze all `struct`s within the active file and get a summary of total bytes, padding, and potential savings.
+- **Inline Hints (Hover)**: Hover over `struct` members to see their size and alignment information directly in the editor.
+- **Optimization Diagnostics**: Get real-time VS Code diagnostics (warnings/information) highlighting `struct`s that can be optimized for memory savings due to padding.
+- **Interactive Web View**: A dedicated web view panel displays a detailed, interactive breakdown of your `struct`s' memory layout.
+- **Settings Integration**: Customize ByteWise behavior through VS Code settings, including toggling inline hints and optimization diagnostics.
 
 ---
 
-## Working with Markdown
+## Getting Started
 
-You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
+### Installation
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets
+1.  Open VS Code.
+2.  Go to the Extensions view (`Ctrl+Shift+X` or `Cmd+Shift+X`).
+3.  Search for "ByteWise".
+4.  Click **Install**.
 
-## For more information
+### Usage
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+Once installed and activated, ByteWise automatically provides features when working with C/C++ files.
 
-**Enjoy!**
+#### Analyzing Structs
+
+You can analyze structs in several ways:
+
+- **Analyze Active File**:
+
+  1.  Open a C/C++ file containing `struct` definitions.
+  2.  Open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`).
+  3.  Type "ByteWise: Analyze File" and select the command.
+  4.  An interactive web view will appear with the analysis, and a summary message will be shown.
+
+- **Analyze Selection**:
+
+  1.  Select a `struct` definition or multiple `struct` definitions in your C/C++ file.
+  2.  Open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`).
+  3.  Type "ByteWise: Analyze Selection" and select the command.
+  4.  An interactive web view will appear with the analysis of the selected structs.
+
+- **Context Menu (Right-Click)**:
+  1.  Right-click anywhere in a C/C++ file.
+  2.  Look for "ByteWise" options in the context menu to analyze the file or selected text.
+
+#### Inline Hints
+
+- Simply **hover your mouse** over a member variable within a `struct` definition in your C/C++ file. A hover tooltip will appear showing its size and alignment.
+
+#### Optimization Diagnostics
+
+- ByteWise will automatically display **information diagnostics** (light blue squiggly underlines) under `struct` definitions that have potential memory savings due to padding. Hover over these diagnostics to see the estimated savings.
+
+---
+
+## Configuration
+
+You can customize ByteWise's behavior through VS Code settings:
+
+1.  Go to `File` > `Preferences` > `Settings` (`Code` > `Preferences` > `Settings` on macOS).
+2.  Search for "ByteWise".
+
+Available settings:
+
+- **`bytewise.showInlineHints`**: Enable or disable inline hover hints for struct members (default: `true`).
+- **`bytewise.showOptimizations`**: Enable or disable diagnostic messages for struct optimization opportunities (default: `true`).
+
+---
+
+## Contributing
+
+(If this were a real project, you'd add information here about how to contribute, file issues, etc.)
+
+---
+
+## License
+
+(If this were a real project, you'd add license information here, e.g., MIT, Apache 2.0, etc.)
+
+---
