@@ -1,0 +1,142 @@
+{
+  "name": "bytewise",
+  "displayName": "ByteWise - C/C++ Struct Analyzer",
+  "description": "Analyze and optimize memory layout of C/C++ structs with visual representations",
+  "version": "1.0.0",
+  "publisher": "your-publisher-name",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other",
+    "Debuggers",
+    "Visualization"
+  ],
+  "keywords": [
+    "c",
+    "cpp",
+    "struct",
+    "memory",
+    "optimization",
+    "alignment",
+    "padding"
+  ],
+  "icon": "resources/icon.png",
+  "activationEvents": [
+    "onLanguage:c",
+    "onLanguage:cpp"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "bytewise.analyzeStruct",
+        "title": "Analyze Struct Layout",
+        "category": "ByteWise",
+        "icon": "$(graph)"
+      },
+      {
+        "command": "bytewise.analyzeSelection",
+        "title": "Analyze Selected Struct",
+        "category": "ByteWise",
+        "icon": "$(selection)"
+      },
+      {
+        "command": "bytewise.analyzeFile",
+        "title": "Analyze All Structs in File",
+        "category": "ByteWise",
+        "icon": "$(file-code)"
+      },
+      {
+        "command": "bytewise.openSettings",
+        "title": "ByteWise Settings",
+        "category": "ByteWise",
+        "icon": "$(settings-gear)"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "bytewise.analyzeSelection",
+          "when": "editorHasSelection && (resourceExtname == .c || resourceExtname == .cpp || resourceExtname == .h || resourceExtname == .hpp)",
+          "group": "ByteWise@1"
+        },
+        {
+          "command": "bytewise.analyzeFile",
+          "when": "resourceExtname == .c || resourceExtname == .cpp || resourceExtname == .h || resourceExtname == .hpp",
+          "group": "ByteWise@2"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "bytewise.analyzeStruct",
+          "when": "resourceExtname == .c || resourceExtname == .cpp || resourceExtname == .h || resourceExtname == .hpp",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "ByteWise",
+      "properties": {
+        "bytewise.targetAlignment": {
+          "type": "number",
+          "default": 8,
+          "description": "Target platform alignment (4 or 8 bytes)",
+          "enum": [
+            4,
+            8
+          ],
+          "enumDescriptions": [
+            "32-bit alignment",
+            "64-bit alignment"
+          ]
+        },
+        "bytewise.showOptimizations": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show struct optimization suggestions"
+        },
+        "bytewise.customTypeSizes": {
+          "type": "object",
+          "default": {},
+          "description": "Custom type sizes for embedded targets (e.g., {\"int\": 2, \"long\": 4})",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "bytewise.showInlineHints": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show inline hints for struct fields"
+        },
+        "bytewise.colorTheme": {
+          "type": "string",
+          "default": "default",
+          "description": "Color theme for memory visualization",
+          "enum": [
+            "default",
+            "colorblind",
+            "high-contrast"
+          ],
+          "enumDescriptions": [
+            "Default colors",
+            "Colorblind-friendly",
+            "High contrast"
+          ]
+        }
+      }
+    }
+  },
+  "scripts": {
+    "test": "node ./test/extension.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/bytewise-extension.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/bytewise-extension/issues"
+  },
+  "homepage": "https://github.com/your-username/bytewise-extension#readme",
+  "license": "MIT"
+}
