@@ -132,11 +132,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/bytewise-extension.git"
+    "url": "https://github.com/HiwarkhedePrasad/ByteWise.git"
   },
   "bugs": {
-    "url": "https://github.com/your-username/bytewise-extension/issues"
+    "url": "https://github.com/HiwarkhedePrasad/ByteWise.git/issues"
   },
-  "homepage": "https://github.com/your-username/bytewise-extension#readme",
+  "homepage": "https://github.com/HiwarkhedePrasad/ByteWise.git#readme",
   "license": "MIT"
 }
