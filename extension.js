@@ -1,6 +1,6 @@
 const vscode = require("vscode");
 const { StructAnalyzer } = require("./src/structAnalyzer");
-const WebViewProvider = require("./src/webViewProvider");
+const WebViewProvider = require("./src/webViewProvider"); // Make sure this path is correct
 
 /**
  * @param {vscode.ExtensionContext} context
@@ -9,9 +9,94 @@ function activate(context) {
   console.log("ByteWise extension is now active!");
 
   const analyzer = new StructAnalyzer();
+  // Instantiate WebViewProvider outside of performAnalysisAndDisplay
   const webViewProvider = new WebViewProvider(context.extensionUri);
 
-  // Register commands
+  // Register diagnostic provider here, globally in activate
+  const diagnosticCollection =
+    vscode.languages.createDiagnosticCollection("bytewise");
+
+  // Function to perform analysis and update UI
+  async function performAnalysisAndDisplay(
+    document,
+    triggerShowWebview = false
+  ) {
+    if (!document || !["c", "cpp"].includes(document.languageId)) {
+      return; // Only analyze C/C++ files
+    }
+
+    const text = document.getText();
+    try {
+      const structs = analyzer.parseStructs(text);
+
+      // --- CRUCIAL CHANGE HERE ---
+      // Always call showAnalysis. The WebViewProvider itself should handle
+      // whether to create a new panel or update an existing one.
+      // We pass `triggerShowWebview` to allow commands to explicitly
+      // open the webview, while onSave might only update if already open,
+      // or conditionally open if a setting allows.
+      if (structs.length > 0) {
+        // Pass a flag to `showAnalysis` if you want it to *only* show
+        // when explicitly commanded, vs. just updating if visible.
+        // For simplicity, let's make it always create/reveal on call.
+        await webViewProvider.showAnalysis(structs, document.fileName);
+      } else {
+        // If no structs found, and the panel is open, you might want to clear it
+        // or show a "No structs found" message within the panel.
+        // For now, if no structs, and panel is open, it might just show old content
+        // or a blank panel depending on WebViewProvider's internal logic.
+        // A better approach would be to send an empty array or specific message.
+        if (webViewProvider.panel && webViewProvider.panel.visible) {
+          await webViewProvider.showAnalysis([], document.fileName); // Send empty to clear/update
+        }
+      }
+
+      // Update Diagnostics (existing logic - good to keep separate from webview display choice)
+      const diagnostics = [];
+      const config = vscode.workspace.getConfiguration("bytewise");
+      if (config.get("showOptimizations", true)) {
+        // Only add diagnostics if enabled
+        structs.forEach((struct) => {
+          if (struct.memorySaved && struct.memorySaved > 0) {
+            const structRegex = new RegExp(
+              `struct\\s+${struct.name}\\s*\\{`,
+              "g"
+            );
+            const match = structRegex.exec(text);
+
+            if (match) {
+              const position = document.positionAt(match.index);
+              const range = new vscode.Range(
+                position,
+                position.translate(0, match[0].length)
+              );
+
+              const diagnostic = new vscode.Diagnostic(
+                range,
+                `Struct can be optimized to save ${
+                  struct.memorySaved
+                } bytes (${(
+                  (struct.memorySaved / struct.totalSize) *
+                  100
+                ).toFixed(1)}% reduction)`,
+                vscode.DiagnosticSeverity.Information
+              );
+              diagnostic.source = "ByteWise";
+              diagnostic.code = "struct-optimization";
+              diagnostics.push(diagnostic);
+            }
+          }
+        });
+      }
+      diagnosticCollection.set(document.uri, diagnostics);
+    } catch (error) {
+      console.error("ByteWise analysis error:", error); // Make error message more generic
+      diagnosticCollection.set(document.uri, []); // Clear diagnostics on error
+    }
+  }
+
+  // --- Register Commands ---
+  // (Ensure these always call performAnalysisAndDisplay, and it then calls showAnalysis)
   const analyzeCommand = vscode.commands.registerCommand(
     "bytewise.analyzeStruct",
     async () => {
@@ -20,26 +105,17 @@ function activate(context) {
         vscode.window.showErrorMessage("No active editor found");
         return;
       }
-
-      const document = editor.document;
-      const text = document.getText();
-
-      try {
-        const structs = analyzer.parseStructs(text);
-        if (structs.length === 0) {
-          vscode.window.showInformationMessage(
-            "No structs found in current file"
-          );
-          return;
-        }
-
-        await webViewProvider.showAnalysis(structs, document.fileName);
+      // This command *should* always show the webview
+      await performAnalysisAndDisplay(editor.document, true);
+      const structs = analyzer.parseStructs(editor.document.getText());
+      if (structs.length > 0) {
         vscode.window.showInformationMessage(
           `Found ${structs.length} struct(s) for analysis`
         );
-      } catch (error) {
-        vscode.window.showErrorMessage(`Analysis failed: ${error.message}`);
-        console.error("ByteWise analysis error:", error);
+      } else {
+        vscode.window.showInformationMessage(
+          "No structs found in the current file."
+        );
       }
     }
   );
@@ -65,9 +141,13 @@ function activate(context) {
         const structs = analyzer.parseStructs(text);
         if (structs.length === 0) {
           vscode.window.showInformationMessage("No structs found in selection");
+          // If no structs found in selection, and panel is open, clear it
+          if (webViewProvider.panel && webViewProvider.panel.visible) {
+            await webViewProvider.showAnalysis([], editor.document.fileName);
+          }
           return;
         }
-
+        // This command *should* always show the webview for the selection
         await webViewProvider.showAnalysis(structs, editor.document.fileName);
       } catch (error) {
         vscode.window.showErrorMessage(
@@ -85,38 +165,19 @@ function activate(context) {
         vscode.window.showErrorMessage("No active editor found");
         return;
       }
+      // This command *should* always show the webview for the file
+      await performAnalysisAndDisplay(editor.document, true);
 
-      const document = editor.document;
-      const text = document.getText();
-
-      try {
-        const structs = analyzer.parseStructs(text);
-        if (structs.length === 0) {
-          vscode.window.showInformationMessage("No structs found in file");
-          return;
-        }
-
-        await webViewProvider.showAnalysis(structs, document.fileName);
-
-        // Show summary
-        const totalBytes = structs.reduce((sum, s) => sum + s.totalSize, 0);
-        const totalPadding = structs.reduce(
-          (sum, s) => sum + s.paddingBytes,
-          0
-        );
-        const totalSavings = structs.reduce(
-          (sum, s) => sum + (s.memorySaved || 0),
-          0
-        );
-
-        vscode.window.showInformationMessage(
-          `Analyzed ${structs.length} structs: ${totalBytes} bytes total, ${totalPadding} padding, ${totalSavings} potential savings`
-        );
-      } catch (error) {
-        vscode.window.showErrorMessage(
-          `File analysis failed: ${error.message}`
-        );
-      }
+      const structs = analyzer.parseStructs(editor.document.getText());
+      const totalBytes = structs.reduce((sum, s) => sum + s.totalSize, 0);
+      const totalPadding = structs.reduce((sum, s) => sum + s.paddingBytes, 0);
+      const totalSavings = structs.reduce(
+        (sum, s) => sum + (s.memorySaved || 0),
+        0
+      );
+      vscode.window.showInformationMessage(
+        `Analyzed ${structs.length} structs: ${totalBytes} bytes total, ${totalPadding} padding, ${totalSavings} potential savings`
+      );
     }
   );
 
@@ -175,63 +236,43 @@ function activate(context) {
     },
   });
 
-  // Register diagnostic provider for struct optimization hints
-  const diagnosticCollection =
-    vscode.languages.createDiagnosticCollection("bytewise");
-
-  const diagnosticProvider = vscode.workspace.onDidChangeTextDocument(
+  // Keep the onDidChangeTextDocument for real-time diagnostics (less aggressive updates)
+  const diagnosticUpdater = vscode.workspace.onDidChangeTextDocument(
     (event) => {
-      const config = vscode.workspace.getConfiguration("bytewise");
-      if (!config.get("showOptimizations", true)) {
-        return;
-      }
-
       const document = event.document;
       if (!["c", "cpp"].includes(document.languageId)) {
+        diagnosticCollection.delete(document.uri); // Clear diagnostics for non C/CPP files
         return;
       }
 
-      try {
-        const structs = analyzer.parseStructs(document.getText());
-        const diagnostics = [];
+      // Perform analysis and update diagnostics. Do NOT explicitly show webview here.
+      // The webview should only appear or update if it's already visible or a command is issued.
+      // If you want live updates in the webview as you type, you'd call webViewProvider.showAnalysis here
+      // but ONLY if webViewProvider.panel is already created and visible.
+      performAnalysisAndDisplay(document, false); // Pass false for triggerShowWebview
+    }
+  );
 
-        structs.forEach((struct) => {
-          if (struct.memorySaved && struct.memorySaved > 0) {
-            // Find struct in document
-            const text = document.getText();
-            const structRegex = new RegExp(
-              `struct\\s+${struct.name}\\s*\\{`,
-              "g"
-            );
-            const match = structRegex.exec(text);
+  // NEW: Listen for save events
+  const onSaveDisposable = vscode.workspace.onDidSaveTextDocument(
+    async (document) => {
+      const config = vscode.workspace.getConfiguration("bytewise");
+      if (!config.get("analyzeOnSave", true)) {
+        return;
+      }
 
-            if (match) {
-              const position = document.positionAt(match.index);
-              const range = new vscode.Range(
-                position,
-                position.translate(0, match[0].length)
-              );
-
-              const diagnostic = new vscode.Diagnostic(
-                range,
-                `Struct can be optimized to save ${
-                  struct.memorySaved
-                } bytes (${(
-                  (struct.memorySaved / struct.totalSize) *
-                  100
-                ).toFixed(1)}% reduction)`,
-                vscode.DiagnosticSeverity.Information
-              );
-              diagnostic.source = "ByteWise";
-              diagnostic.code = "struct-optimization";
-              diagnostics.push(diagnostic);
-            }
-          }
-        });
-
-        diagnosticCollection.set(document.uri, diagnostics);
-      } catch (error) {
-        // Silently ignore parsing errors in diagnostic provider
+      if (["c", "cpp"].includes(document.languageId)) {
+        console.log(
+          `ByteWise: Document saved, re-analyzing ${document.fileName}`
+        );
+        // On save, we want to update the diagnostics AND update the webview
+        // IF it's already open.
+        if (webViewProvider.panel && webViewProvider.panel.visible) {
+          await performAnalysisAndDisplay(document, false); // Don't force show, just update
+        } else {
+          // Even if webview isn't visible, still update diagnostics
+          await performAnalysisAndDisplay(document, false);
+        }
       }
     }
   );
@@ -244,7 +285,8 @@ function activate(context) {
     settingsCommand,
     hoverProvider,
     diagnosticCollection,
-    diagnosticProvider
+    diagnosticUpdater,
+    onSaveDisposable
   );
 
   // Show welcome message on first activation
@@ -255,7 +297,7 @@ function activate(context) {
   if (!hasShownWelcome) {
     vscode.window
       .showInformationMessage(
-        "ByteWise is ready! Right-click on C/C++ structs to analyze memory layout.",
+        "ByteWise is ready! Right-click on C/C++ structs to analyze memory layout. Try saving a C/C++ file to see live updates!",
         "Got it!"
       )
       .then(() => {

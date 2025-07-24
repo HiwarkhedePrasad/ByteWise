@@ -123,6 +123,11 @@
             "Colorblind-friendly",
             "High contrast"
           ]
+        },
+        "bytewise.analyzeOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically re-analyze the active C/C++ file and update the analysis view/diagnostics when saved."
         }
       }
     }
