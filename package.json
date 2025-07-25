@@ -2,7 +2,7 @@
   "name": "bytewise",
   "displayName": "ByteWise - C/C++ Struct Analyzer",
   "description": "Analyze and optimize memory layout of C/C++ structs with visual representations",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "phiwarkhede",
   "engines": {
     "vscode": "^1.74.0"
