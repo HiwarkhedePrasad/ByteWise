@@ -1,13 +1,21 @@
+// jsconfig.json
 {
-	"compilerOptions": {
-		"module": "Node16",
-		"target": "ES2022",
-		"checkJs": true,  /* Typecheck .js files. */
-		"lib": [
-			"ES2022"
-		]
-	},
-	"exclude": [
-		"node_modules"
-	]
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2020", // Or "es6" or higher
+    "checkJs": true, // Enable type checking for JavaScript files
+    "allowSyntheticDefaultImports": true, // Recommended for commonJS interop
+    "lib": ["es2020"] // Specify standard libraries to include
+    // "typeAcquisition" should NOT be here
+  },
+  "typeAcquisition": {
+    // <--- This block is now at the top level
+    "enable": true // Enable automatic type acquisition for npm modules
+  },
+  "include": [
+    "src/**/*",
+    "extension.js",
+    "./node_modules/@types" // Ensure types from node_modules are included
+  ],
+  "exclude": ["node_modules", "**/node_modules/*"]
 }

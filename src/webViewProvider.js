@@ -11,14 +11,15 @@ class WebViewProvider {
     this.preserveFocus = preserve;
   }
 
+  // In webViewProvider.js, replace the showAnalysis method with this fixed version:
+
   async showAnalysis(structs, fileName = "Unknown") {
     if (this.panel) {
-      // Update existing panel
-      this.panel.webview.postMessage({
-        command: "updateAnalysis",
-        structs: structs,
-        fileName: fileName,
-      });
+      // FIXED: Always regenerate HTML completely instead of trying to update
+      this.panel.webview.html = this.getWebviewContent(structs, fileName);
+
+      // Remove the postMessage call that was causing issues
+      // The HTML already contains all the data we need
 
       if (!this.preserveFocus) {
         this.panel.reveal(vscode.ViewColumn.Two);
@@ -35,6 +36,9 @@ class WebViewProvider {
           localResourceRoots: [this.extensionUri],
         }
       );
+
+      console.log("Structs to render:", JSON.stringify(structs, null, 2));
+      this.panel.reveal(vscode.ViewColumn.Beside, true);
 
       this.panel.webview.html = this.getWebviewContent(structs, fileName);
 
@@ -1068,137 +1072,134 @@ class WebViewProvider {
     
     <div class="tooltip" id="tooltip"></div>
     
-    <script>
-        const vscode = acquireVsCodeApi();
-        
-        function copyCode(code) {
-            vscode.postMessage({
-                command: 'copyOptimized',
-                code: code
-            });
-        }
-        
-        function applyOptimization(structName, code) {
-            vscode.postMessage({
-                command: 'applyOptimization',
-                structName: structName,
-                code: code
-            });
-        }
-        
-        function exportAnalysis() {
-            vscode.postMessage({
-                command: 'exportAnalysis'
-            });
-        }
-        
-        function showFieldDetails(structName, fieldName) {
-            const structs = ${JSON.stringify(structs)};
-            const struct = structs.find(s => s.name === structName);
-            if (struct) {
-                vscode.postMessage({
-                    command: 'showFieldDetails',
-                    struct: struct,
-                    field: fieldName
-                });
-            }
-        }
-        
-        // Enhanced tooltip functionality
-        const tooltip = document.getElementById('tooltip');
-        let tooltipTimeout;
-        
-        function showTooltip(element, content) {
-            clearTimeout(tooltipTimeout);
-            tooltip.innerHTML = content;
-            tooltip.classList.add('show');
-            
-            const rect = element.getBoundingClientRect();
-            const tooltipRect = tooltip.getBoundingClientRect();
-            
-            let left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
-            let top = rect.top - tooltipRect.height - 12;
-            
-            // Adjust if tooltip goes off-screen
-            if (left < 8) left = 8;
-            if (left + tooltipRect.width > window.innerWidth - 8) {
-                left = window.innerWidth - tooltipRect.width - 8;
-            }
-            if (top < 8) {
-                top = rect.bottom + 12;
-                tooltip.style.transform = 'translateY(-4px)';
-            }
-            
-            tooltip.style.left = left + 'px';
-            tooltip.style.top = top + 'px';
-        }
-        
-        function hideTooltip() {
-            tooltipTimeout = setTimeout(() => {
-                tooltip.classList.remove('show');
-            }, 100);
-        }
-        
-        // Add event listeners for memory blocks
-        document.querySelectorAll('.memory-block').forEach(block => {
-            block.addEventListener('mouseenter', (e) => {
-                const tooltipContent = e.target.dataset.tooltip;
-                if (tooltipContent) {
-                    showTooltip(e.target, tooltipContent);
-                }
-            });
-            
-            block.addEventListener('mouseleave', hideTooltip);
-            
-            // Add keyboard support
-            block.setAttribute('tabindex', '0');
-            block.addEventListener('focus', (e) => {
-                const tooltipContent = e.target.dataset.tooltip;
-                if (tooltipContent) {
-                    showTooltip(e.target, tooltipContent);
-                }
-            });
-            
-            block.addEventListener('blur', hideTooltip);
+   // In the getWebviewContent method, replace the entire <script> section with this:
+
+<script>
+    const vscode = acquireVsCodeApi();
+    
+    // Store the current data globally for reference
+    let currentStructs = ${JSON.stringify(structs)};
+    let currentFileName = '${escapeHtml(fileName)}';
+    
+    function copyCode(code) {
+        vscode.postMessage({
+            command: 'copyOptimized',
+            code: code
         });
-        
-        // Add click handlers for field table rows
-        document.querySelectorAll('.field-table tbody tr').forEach(row => {
-            row.setAttribute('tabindex', '0');
-            row.addEventListener('click', (e) => {
-                const structContainer = e.target.closest('.struct-card');
-                if (structContainer) {
-                    const structName = structContainer.dataset.structName;
-                    const fieldNameCell = row.querySelector('.field-name');
-                    if (fieldNameCell && structName) {
-                        const fieldName = fieldNameCell.textContent.trim();
-                        showFieldDetails(structName, fieldName);
-                    }
-                }
-            });
-            
-            // Keyboard support for table rows
-            row.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    row.click();
-                }
-            });
+    }
+    
+    function applyOptimization(structName, code) {
+        vscode.postMessage({
+            command: 'applyOptimization',
+            structName: structName,
+            code: code
         });
+    }
+    
+    function exportAnalysis() {
+        vscode.postMessage({
+            command: 'exportAnalysis'
+        });
+    }
+    
+    function showFieldDetails(structName, fieldName) {
+        const struct = currentStructs.find(s => s.name === structName);
+        if (struct) {
+            vscode.postMessage({
+                command: 'showFieldDetails',
+                struct: struct,
+                field: fieldName
+            });
+        }
+    }
+    
+    // Enhanced tooltip functionality
+    const tooltip = document.getElementById('tooltip');
+    let tooltipTimeout;
+    
+    function showTooltip(element, content) {
+        clearTimeout(tooltipTimeout);
+        tooltip.innerHTML = content;
+        tooltip.classList.add('show');
         
-        // Handle message updates from extension
-        window.addEventListener('message', event => {
-            const message = event.data;
-            switch (message.command) {
-                case 'updateAnalysis':
-                    // Update the page content with new analysis data
-                    location.reload(); // Simple approach - reload the webview
-                    break;
+        const rect = element.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+        
+        let left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+        let top = rect.top - tooltipRect.height - 12;
+        
+        // Adjust if tooltip goes off-screen
+        if (left < 8) left = 8;
+        if (left + tooltipRect.width > window.innerWidth - 8) {
+            left = window.innerWidth - tooltipRect.width - 8;
+        }
+        if (top < 8) {
+            top = rect.bottom + 12;
+            tooltip.style.transform = 'translateY(-4px)';
+        }
+        
+        tooltip.style.left = left + 'px';
+        tooltip.style.top = top + 'px';
+    }
+    
+    function hideTooltip() {
+        tooltipTimeout = setTimeout(() => {
+            tooltip.classList.remove('show');
+        }, 100);
+    }
+    
+    // Add event listeners for memory blocks
+    document.querySelectorAll('.memory-block').forEach(block => {
+        block.addEventListener('mouseenter', (e) => {
+            const tooltipContent = e.target.dataset.tooltip;
+            if (tooltipContent) {
+                showTooltip(e.target, tooltipContent);
             }
         });
         
-        console.log('ByteWise WebView loaded successfully with modern design');
-    </script>
+        block.addEventListener('mouseleave', hideTooltip);
+        
+        // Add keyboard support
+        block.setAttribute('tabindex', '0');
+        block.addEventListener('focus', (e) => {
+            const tooltipContent = e.target.dataset.tooltip;
+            if (tooltipContent) {
+                showTooltip(e.target, tooltipContent);
+            }
+        });
+        
+        block.addEventListener('blur', hideTooltip);
+    });
+    
+    // Add click handlers for field table rows
+    document.querySelectorAll('.field-table tbody tr').forEach(row => {
+        row.setAttribute('tabindex', '0');
+        row.addEventListener('click', (e) => {
+            const structContainer = e.target.closest('.struct-card');
+            if (structContainer) {
+                const structName = structContainer.dataset.structName;
+                const fieldNameCell = row.querySelector('.field-name');
+                if (fieldNameCell && structName) {
+                    const fieldName = fieldNameCell.textContent.trim();
+                    showFieldDetails(structName, fieldName);
+                }
+            }
+        });
+        
+        // Keyboard support for table rows
+        row.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                row.click();
+            }
+        });
+    });
+    
+    // REMOVED: The problematic message handler that was causing blank screens
+    // No longer listening for 'updateAnalysis' messages since we regenerate HTML completely
+    
+    console.log('ByteWise WebView loaded successfully with modern design');
+</script>
 </body>
 </html>`;
   }
@@ -1419,7 +1420,7 @@ class WebViewProvider {
                     )}\`)" class="btn btn-secondary">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2 2v1"/>
                         </svg>
                         Copy Code
                     </button>
