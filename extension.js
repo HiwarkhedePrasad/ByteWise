@@ -1,6 +1,13 @@
 const vscode = require("vscode");
 const { StructAnalyzer } = require("./src/structAnalyzer");
 const WebViewProvider = require("./src/webViewProvider");
+const {
+  COMMANDS,
+  SUPPORTED_LANGUAGES,
+  DIAGNOSTIC_SOURCE,
+  DIAGNOSTIC_CODE,
+  EXTENSION_NAME,
+} = require("./src/constants");
 
 /**
  * @type {WebViewProvider | undefined}
@@ -9,25 +16,25 @@ const WebViewProvider = require("./src/webViewProvider");
 let byteWiseWebViewProvider;
 
 /**
- * @param {vscode.ExtensionContext} context
+ * Activate the ByteWise extension
+ * @param {vscode.ExtensionContext} context - VS Code extension context
  */
 function activate(context) {
   console.log("ByteWise extension is now active!");
 
   const analyzer = new StructAnalyzer();
-  // Initialize the WebViewProvider instance here
   byteWiseWebViewProvider = new WebViewProvider(context.extensionUri);
 
   // Register diagnostic provider
   const diagnosticCollection =
-    vscode.languages.createDiagnosticCollection("bytewise");
+    vscode.languages.createDiagnosticCollection(EXTENSION_NAME);
 
   /**
-   * Function to update diagnostics only (for real-time feedback while typing)
-   * @param {vscode.TextDocument} document
+   * Update diagnostics only (for real-time feedback while typing)
+   * @param {vscode.TextDocument} document - The document to update diagnostics for
    */
   async function updateDiagnosticsOnly(document) {
-    if (!document || !["c", "cpp"].includes(document.languageId)) {
+    if (!document || !SUPPORTED_LANGUAGES.includes(document.languageId)) {
       return;
     }
 
@@ -37,7 +44,7 @@ function activate(context) {
 
       // Update Diagnostics only
       const diagnostics = [];
-      const config = vscode.workspace.getConfiguration("bytewise");
+      const config = vscode.workspace.getConfiguration(EXTENSION_NAME);
       if (config.get("showOptimizations", true)) {
         structs.forEach((struct) => {
           if (struct.memorySaved && struct.memorySaved > 0) {
@@ -64,8 +71,8 @@ function activate(context) {
                 ).toFixed(1)}% reduction)`,
                 vscode.DiagnosticSeverity.Information
               );
-              diagnostic.source = "ByteWise";
-              diagnostic.code = "struct-optimization";
+              diagnostic.source = DIAGNOSTIC_SOURCE;
+              diagnostic.code = DIAGNOSTIC_CODE;
               diagnostics.push(diagnostic);
             }
           }
@@ -82,15 +89,15 @@ function activate(context) {
   }
 
   /**
-   * Function to perform analysis and update UI (both diagnostics and webview)
-   * @param {vscode.TextDocument} document - The document to analyze.
-   * @param {boolean} triggerShowWebview - If true, forces the webview to open/show even if no structs are found.
+   * Perform analysis and update UI (both diagnostics and webview)
+   * @param {vscode.TextDocument} document - The document to analyze
+   * @param {boolean} triggerShowWebview - Force webview to open even if no structs found
    */
   async function performAnalysisAndDisplay(
     document,
     triggerShowWebview = false
   ) {
-    if (!document || !["c", "cpp"].includes(document.languageId)) {
+    if (!document || !SUPPORTED_LANGUAGES.includes(document.languageId)) {
       return;
     }
 
@@ -146,7 +153,7 @@ function activate(context) {
 
   // --- Register Commands ---
   const analyzeCommand = vscode.commands.registerCommand(
-    "bytewise.analyzeStruct",
+    COMMANDS.ANALYZE_STRUCT,
     async () => {
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
@@ -171,7 +178,7 @@ function activate(context) {
   );
 
   const analyzeSelectionCommand = vscode.commands.registerCommand(
-    "bytewise.analyzeSelection",
+    COMMANDS.ANALYZE_SELECTION,
     async () => {
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
@@ -207,7 +214,7 @@ function activate(context) {
   );
 
   const analyzeFileCommand = vscode.commands.registerCommand(
-    "bytewise.analyzeFile",
+    COMMANDS.ANALYZE_FILE,
     async () => {
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
@@ -238,70 +245,73 @@ function activate(context) {
   );
 
   const settingsCommand = vscode.commands.registerCommand(
-    "bytewise.openSettings",
+    COMMANDS.OPEN_SETTINGS,
     () => {
       vscode.commands.executeCommand(
         "workbench.action.openSettings",
-        "bytewise"
+        EXTENSION_NAME
       );
     }
   );
 
   // Register hover provider for inline hints
-  const hoverProvider = vscode.languages.registerHoverProvider(["c", "cpp"], {
-    /**
-     * @param {vscode.TextDocument} document
-     * @param {vscode.Position} position
-     * @param {vscode.CancellationToken} token
-     */
-    provideHover(document, position, token) {
-      const config = vscode.workspace.getConfiguration("bytewise");
-      if (!config.get("showInlineHints", true)) {
-        return null;
-      }
-
-      const line = document.lineAt(position);
-      const text = line.text;
-
-      // Match struct field declarations
-      const fieldMatch = text.match(
-        /^\s*(\w+(?:\s*\*)?)\s+(\w+)(?:\[(\d+)\])?(?:\s*:\s*\d+)?\s*;/
-      );
-      if (fieldMatch) {
-        const [, type, name, arraySize] = fieldMatch;
-        const size = analyzer.getTypeSize(
-          type,
-          arraySize ? parseInt(arraySize) : 1
-        );
-        const alignment = analyzer.getTypeAlignment(type);
-
-        const hoverText = new vscode.MarkdownString();
-        hoverText.appendMarkdown(`**${name}** \`${type}\`\n\n`);
-        hoverText.appendMarkdown(`📏 **Size:** ${size} bytes\n`);
-        hoverText.appendMarkdown(`🎯 **Alignment:** ${alignment} bytes\n`);
-
-        if (arraySize) {
-          hoverText.appendMarkdown(
-            `📊 **Array Size:** ${arraySize} elements\n`
-          );
-          hoverText.appendMarkdown(
-            `💾 **Element Size:** ${size / parseInt(arraySize)} bytes\n`
-          );
+  const hoverProvider = vscode.languages.registerHoverProvider(
+    SUPPORTED_LANGUAGES,
+    {
+      /**
+       * @param {vscode.TextDocument} document
+       * @param {vscode.Position} position
+       * @param {vscode.CancellationToken} token
+       */
+      provideHover(document, position, token) {
+        const config = vscode.workspace.getConfiguration(EXTENSION_NAME);
+        if (!config.get("showInlineHints", true)) {
+          return null;
         }
 
-        hoverText.appendMarkdown(`\n---\n*ByteWise struct analyzer*`);
+        const line = document.lineAt(position);
+        const text = line.text;
 
-        return new vscode.Hover(hoverText);
-      }
-      return null;
-    },
-  });
+        // Match struct field declarations
+        const fieldMatch = text.match(
+          /^\s*(\w+(?:\s*\*)?)\s+(\w+)(?:\[(\d+)\])?(?:\s*:\s*\d+)?\s*;/
+        );
+        if (fieldMatch) {
+          const [, type, name, arraySize] = fieldMatch;
+          const size = analyzer.getTypeSize(
+            type,
+            arraySize ? parseInt(arraySize) : 1
+          );
+          const alignment = analyzer.getTypeAlignment(type);
+
+          const hoverText = new vscode.MarkdownString();
+          hoverText.appendMarkdown(`**${name}** \`${type}\`\n\n`);
+          hoverText.appendMarkdown(`📏 **Size:** ${size} bytes\n`);
+          hoverText.appendMarkdown(`🎯 **Alignment:** ${alignment} bytes\n`);
+
+          if (arraySize) {
+            hoverText.appendMarkdown(
+              `📊 **Array Size:** ${arraySize} elements\n`
+            );
+            hoverText.appendMarkdown(
+              `💾 **Element Size:** ${size / parseInt(arraySize)} bytes\n`
+            );
+          }
+
+          hoverText.appendMarkdown(`\n---\n*ByteWise struct analyzer*`);
+
+          return new vscode.Hover(hoverText);
+        }
+        return null;
+      },
+    }
+  );
 
   // onDidChangeTextDocument - only updates diagnostics, preserves webview
   const diagnosticUpdater = vscode.workspace.onDidChangeTextDocument(
     (event) => {
       const document = event.document;
-      if (!["c", "cpp"].includes(document.languageId)) {
+      if (!SUPPORTED_LANGUAGES.includes(document.languageId)) {
         diagnosticCollection.delete(document.uri);
         return;
       }
@@ -314,12 +324,12 @@ function activate(context) {
   // onDidSaveTextDocument - properly updates webview on save
   const onSaveDisposable = vscode.workspace.onDidSaveTextDocument(
     async (document) => {
-      const config = vscode.workspace.getConfiguration("bytewise");
+      const config = vscode.workspace.getConfiguration(EXTENSION_NAME);
       if (!config.get("analyzeOnSave", true)) {
         return;
       }
 
-      if (["c", "cpp"].includes(document.languageId)) {
+      if (SUPPORTED_LANGUAGES.includes(document.languageId)) {
         console.log(
           `ByteWise: Document saved, re-analyzing ${document.fileName}`
         );
@@ -343,7 +353,7 @@ function activate(context) {
 
   // Show welcome message on first activation
   const hasShownWelcome = context.globalState.get(
-    "bytewise.hasShownWelcome",
+    `${EXTENSION_NAME}.hasShownWelcome`,
     false
   );
   if (!hasShownWelcome) {
@@ -353,18 +363,19 @@ function activate(context) {
         "Got it!"
       )
       .then(() => {
-        context.globalState.update("bytewise.hasShownWelcome", true);
+        context.globalState.update(`${EXTENSION_NAME}.hasShownWelcome`, true);
       });
   }
 }
 
 /**
- * This method is called when your extension is deactivated
+ * Deactivate the ByteWise extension
  */
 function deactivate() {
   console.log("ByteWise extension deactivated");
-  // Dispose of the webview panel if it exists
-  if (byteWiseWebViewProvider && byteWiseWebViewProvider.panel) {
+
+  // Clean up webview panel
+  if (byteWiseWebViewProvider?.panel) {
     byteWiseWebViewProvider.panel.dispose();
   }
 }
