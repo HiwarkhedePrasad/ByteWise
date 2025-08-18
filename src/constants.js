@@ -27,6 +27,7 @@ const WEBVIEW_MESSAGE_COMMANDS = {
   APPLY_OPTIMIZATION: "applyOptimization",
   EXPORT_ANALYSIS: "exportAnalysis",
   SHOW_FIELD_DETAILS: "showFieldDetails",
+  OPEN_FILE_ANALYSIS: "openFileAnalysis",
 };
 
 module.exports = {

@@ -14,6 +14,13 @@ ByteWise helps C/C++ developers understand and optimize the memory layout of the
 - **Actionable commands**: Copy optimized code, apply it into the editor, and export analysis to Markdown.
 - **Configurable**: Alignment, type sizes (embedded targets), inline hints, themes, and auto-analyze on save.
 
+### New: Project Structure with Optimization Status
+
+- Workspace-aware file tree for C/C++ files relative to your opened VS Code workspace
+- Color-coded file names: green if all structs are optimal (or no structs), red if any struct has savings
+- Click a file name to load its analysis in the webview
+- Apply Optimization replaces the struct definition in-place; reopens the file if needed
+
 ---
 
 ## Installation
@@ -52,6 +59,16 @@ You can analyze structs in several ways:
 #### Optimization Diagnostics
 
 - Info diagnostics appear under struct declarations with potential memory savings from reordering. Hover for details.
+
+#### Project Structure Panel
+
+- The analysis view includes a Project Structure section listing relevant C/C++ files.
+- File names are colored by status: green for optimal/no-structs, red if optimizations are available.
+- Click a file name to show its analysis right in the webview.
+
+#### Apply Optimization
+
+- Replaces the original `struct` definition in-place (supports both `struct Name { ... };` and `typedef struct { ... } Name;`). If the file isn’t open, it’s reopened automatically.
 
 ---
 
@@ -132,6 +149,22 @@ src/
   utils/
     typeUtils.js
     layoutUtils.js
+
+Media assets for the marketplace should live in `media/` (e.g., `media/analysis.png`, `media/project-tree.png`). Add screenshots/GIFs and reference them below.
+
+## Screenshots
+
+Place images in `media/`:
+
+![Analysis View](media/analysis.png)
+![Project Tree](media/project-tree.png)
+
+## Commands
+
+- ByteWise: Analyze Struct Layout (`bytewise.analyzeStruct`)
+- ByteWise: Analyze Selected Struct (`bytewise.analyzeSelection`)
+- ByteWise: Analyze All Structs in File (`bytewise.analyzeFile`)
+- ByteWise: ByteWise Settings (`bytewise.openSettings`)
 ```
 
 See `CHANGELOG.md` for notable updates.

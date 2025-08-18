@@ -123,7 +123,11 @@ function activate(context) {
       ) {
         // Pass the analysis results to the webview provider
         // The showAnalysis method in WebViewProvider will handle creating/updating the panel
-        await byteWiseWebViewProvider.showAnalysis(structs, document.fileName);
+        await byteWiseWebViewProvider.showAnalysis(
+          structs,
+          document.fileName,
+          document.uri
+        );
       } else if (
         structs.length === 0 &&
         byteWiseWebViewProvider.panel &&
@@ -131,7 +135,11 @@ function activate(context) {
       ) {
         // If no structs are found, but the panel is visible, update it to show "No structs found" message.
         // This prevents the panel from showing stale data or remaining blank if all structs are removed.
-        await byteWiseWebViewProvider.showAnalysis([], document.fileName);
+        await byteWiseWebViewProvider.showAnalysis(
+          [],
+          document.fileName,
+          document.uri
+        );
       }
     } catch (error) {
       console.error("ByteWise analysis error:", error);
@@ -146,7 +154,11 @@ function activate(context) {
         byteWiseWebViewProvider.panel &&
         byteWiseWebViewProvider.panel.visible
       ) {
-        byteWiseWebViewProvider.showAnalysis([], document.fileName); // Pass error message to webview
+        byteWiseWebViewProvider.showAnalysis(
+          [],
+          document.fileName,
+          document.uri
+        ); // Pass error message to webview
       }
     }
   }
@@ -199,7 +211,8 @@ function activate(context) {
         // For selection, always show analysis in the webview
         await byteWiseWebViewProvider.showAnalysis(
           structs,
-          editor.document.fileName
+          editor.document.fileName,
+          editor.document.uri
         );
 
         if (structs.length === 0) {

@@ -26,34 +26,49 @@ src/
 ## Key Improvements
 
 ### 1. **Modular Architecture**
+
 - Separated concerns into logical modules
 - Clear separation between business logic, UI, and utilities
 - Easy to test and maintain individual components
 
 ### 2. **Constants Management**
+
 - Centralized all extension constants
 - Consistent naming conventions
 - Easy to update configuration values
 
 ### 3. **Code Organization**
+
 - Moved large embedded HTML/CSS/JS to separate template files
 - Split complex functions into smaller, focused utilities
 - Improved readability and maintainability
 
 ### 4. **Documentation**
+
 - Added comprehensive JSDoc comments
 - Clear function signatures and parameter descriptions
 - Improved code self-documentation
 
 ### 5. **Error Handling**
+
 - Consistent error handling patterns
 - Better user feedback for failures
 - Graceful degradation
 
 ### 6. **Performance**
+
 - Reduced code duplication
 - Optimized imports and dependencies
 - Cleaner memory management
+
+## Project Tree and Optimization
+
+- The analysis view includes a Project Structure section that scans workspace C/C++ files.
+- Files are colored by optimization status and are clickable to load analysis for that file.
+
+## Apply Optimization Behavior
+
+- The Apply Optimization action replaces the original struct definition (by brace matching), or inserts at cursor if not found.
 
 ## Usage
 

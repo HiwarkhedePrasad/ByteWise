@@ -727,6 +727,13 @@ function getWebviewScript() {
         code: code
       });
     }
+    // New helper that avoids HTML escaping complexities
+    function copyText(text) {
+      vscode.postMessage({
+        command: 'copyOptimized',
+        code: text
+      });
+    }
     
     function applyOptimization(structName, code) {
       vscode.postMessage({
@@ -739,6 +746,13 @@ function getWebviewScript() {
     function exportAnalysis() {
       vscode.postMessage({
         command: 'exportAnalysis'
+      });
+    }
+    function openFileAnalysis(relPath) {
+      if (!relPath) return;
+      vscode.postMessage({
+        command: 'openFileAnalysis',
+        path: relPath
       });
     }
     

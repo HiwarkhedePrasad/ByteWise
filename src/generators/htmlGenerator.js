@@ -84,14 +84,15 @@ function generateOptimizedCode(struct) {
 
   let code = `struct ${struct.name} {\n`;
   struct.optimizedFields.forEach((field) => {
-    let typeName = field.type;
-    if (field.arraySize) {
-      typeName += `[${field.arraySize}]`;
-    }
-    if (field.isBitField) {
-      typeName += ` : ${field.bits}`;
-    }
-    code += `    ${typeName} ${field.name};\n`;
+    // Emit correct C syntax, including arrays and bitfields
+    const baseType = field.type;
+    const nameWithArray = field.arraySize
+      ? `${field.name}[${field.arraySize}]`
+      : field.name;
+    const nameWithBitfield = field.isBitField
+      ? `${nameWithArray} : ${field.bits}`
+      : nameWithArray;
+    code += `    ${baseType} ${nameWithBitfield};\n`;
   });
   code += `};`;
   return code;
@@ -306,20 +307,18 @@ function generateStructHTML(struct, index) {
         </div>
         
         <div class="button-group">
-          <button onclick="copyCode(\`${escapeHtml(
-            optimizedCode.replace(/`/g, "\\`")
-          )}\`)" class="btn btn-secondary">
+          <button onclick='copyText(${JSON.stringify(
+            optimizedCode
+          )})' class="btn btn-secondary">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2 2v1"/>
             </svg>
             Copy Code
           </button>
-          <button onclick="applyOptimization('${escapeHtml(
+          <button onclick='applyOptimization(${JSON.stringify(
             struct.name || ""
-          )}', \`${escapeHtml(
-              optimizedCode.replace(/`/g, "\\`")
-            )}\`)" class="btn btn-success">
+          )}, ${JSON.stringify(optimizedCode)})' class="btn btn-success">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
             </svg>
@@ -348,9 +347,10 @@ function generateStructHTML(struct, index) {
  * Generate the complete webview HTML content
  * @param {Array} structs - Array of struct information
  * @param {string} fileName - Source file name
+ * @param {string} [workspaceTree] - Optional ASCII workspace tree
  * @returns {string} Complete HTML content
  */
-function generateWebviewContent(structs, fileName) {
+function generateWebviewContent(structs, fileName, workspaceTree) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -372,6 +372,8 @@ function generateWebviewContent(structs, fileName) {
             <p class="header-subtitle">Memory Layout Analysis & Optimization</p>
             <div class="header-filename">${escapeHtml(fileName)}</div>
         </header>
+        
+        ${workspaceTree ? renderWorkspaceTree(workspaceTree) : ""}
         
         ${generateSummaryStats(structs)}
         
@@ -404,6 +406,53 @@ function generateWebviewContent(structs, fileName) {
     </script>
 </body>
 </html>`;
+}
+
+function renderWorkspaceTree(tree) {
+  // Render folders and files as an interactive list with color-coded filenames
+  const renderNode = (node, depth = 0) => {
+    const indent = "&nbsp;".repeat(depth * 4);
+    const foldersHtml = (node.folders || [])
+      .map(
+        (f) =>
+          `${indent}<div class=\"ws-item ws-folder\">📁 ${escapeHtml(
+            f.name
+          )}</div>` + renderNode(f, depth + 1)
+      )
+      .join("");
+    const filesHtml = (node.files || [])
+      .map((file) => {
+        const cls = file.status?.isOptimized ? "ws-file-ok" : "ws-file-bad";
+        const clickable = file.ellipsis
+          ? ""
+          : ` onclick=\"openFileAnalysis('${escapeHtml(
+              file.relPath || ""
+            )}')\"`;
+        const label = escapeHtml(file.name);
+        return `${indent}<div class=\"ws-item ws-file ${cls}\"${clickable}>${label}</div>`;
+      })
+      .join("");
+    return foldersHtml + filesHtml;
+  };
+
+  return `
+  <section class="field-section">
+    <div class="section-title">Project Structure</div>
+    <div class="field-table-container">
+      <style>
+        .ws-item { font-family: var(--font-mono); padding: 4px 8px; cursor: default; }
+        .ws-folder { color: var(--text-secondary); font-weight: 600; }
+        .ws-file { cursor: pointer; }
+        .ws-file-ok { color: #059669; }
+        .ws-file-bad { color: #dc2626; }
+        .ws-file:hover { background: var(--bg-hover); }
+      </style>
+      <div class="code-block" style="white-space: normal;">
+        ${renderNode(tree, 0)}
+      </div>
+    </div>
+  </section>
+  `;
 }
 
 module.exports = {

@@ -99,8 +99,8 @@ function createField(
       return {
         name,
         type: "function pointer",
-        size: 8, // Pointer size
-        alignment: 8,
+        size: getTypeSize("void*", 1, typeSizes),
+        alignment: getTypeAlignment("void*", targetAlignment, typeSizes),
         offset: 0,
         isFunctionPointer: true,
       };
