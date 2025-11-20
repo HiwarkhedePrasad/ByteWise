@@ -1,0 +1,692 @@
+[
+  {
+    "name": "Flex",
+    "fields": [
+      {
+        "name": "len",
+        "type": "size_t",
+        "size": 8,
+        "alignment": 8,
+        "offset": 0,
+        "isFlexibleArray": false,
+        "padding": 0
+      },
+      {
+        "name": "data",
+        "type": "char",
+        "size": 0,
+        "alignment": 1,
+        "offset": 8,
+        "isFlexibleArray": true,
+        "padding": 0
+      }
+    ],
+    "totalSize": 8,
+    "paddingBytes": 0,
+    "optimizedFields": [
+      {
+        "name": "len",
+        "type": "size_t",
+        "size": 8,
+        "alignment": 8,
+        "offset": 0,
+        "isFlexibleArray": false,
+        "padding": 0
+      },
+      {
+        "name": "data",
+        "type": "char",
+        "size": 0,
+        "alignment": 1,
+        "offset": 8,
+        "isFlexibleArray": true,
+        "padding": 0
+      }
+    ],
+    "optimizedSize": 8,
+    "memorySaved": 0,
+    "optimizationRatio": 0,
+    "message": "Contains complex types (not optimized)",
+    "sourceMatch": "struct Flex {\r\n    size_t len;\r\n    char data[]; \r\n};"
+  },
+  {
+    "name": "PackedP",
+    "fields": [
+      {
+        "name": "a",
+        "type": "char",
+        "size": 1,
+        "alignment": 1,
+        "offset": 0,
+        "isFlexibleArray": false,
+        "padding": 0
+      },
+      {
+        "name": "b",
+        "type": "int",
+        "size": 4,
+        "alignment": 4,
+        "offset": 1,
+        "isFlexibleArray": false,
+        "padding": 0
+      },
+      {
+        "name": "c",
+        "type": "char",
+        "size": 1,
+        "alignment": 1,
+        "offset": 5,
+        "isFlexibleArray": false,
+        "padding": 0
+      }
+    ],
+    "totalSize": 6,
+    "paddingBytes": 0,
+    "optimizedFields": [
+      {
+        "name": "a",
+        "type": "char",
+        "size": 1,
+        "alignment": 1,
+        "offset": 0,
+        "isFlexibleArray": false,
+        "padding": 0
+      },
+      {
+        "name": "b",
+        "type": "int",
+        "size": 4,
+        "alignment": 4,
+        "offset": 1,
+        "isFlexibleArray": false,
+        "padding": 0
+      },
+      {
+        "name": "c",
+        "type": "char",
+        "size": 1,
+        "alignment": 1,
+        "offset": 5,
+        "isFlexibleArray": false,
+        "padding": 0
+      }
+    ],
+    "optimizedSize": 6,
+    "memorySaved": 0,
+    "optimizationRatio": 0,
+    "message": "Packed struct (not optimized)",
+    "sourceMatch": "struct PackedP {\r\n    char a;\r\n    int b;\r\n    char c;\r\n};"
+  },
+  {
+    "name": "WithAnon",
+    "fields": [
+      {
+        "name": "anon",
+        "type": "struct { ... }",
+        "isAnonymous": true,
+        "isUnion": false,
+        "size": 8,
+        "alignment": 4,
+        "offset": 0,
+        "innerFields": [
+          {
+            "name": "a",
+            "type": "int",
+            "size": 4,
+            "alignment": 4,
+            "offset": 0,
+            "isFlexibleArray": false
+          },
+          {
+            "name": "b",
+            "type": "char",
+            "size": 1,
+            "alignment": 1,
+            "offset": 0,
+            "isFlexibleArray": false
+          }
+        ],
+        "padding": 0
+      },
+      {
+        "name": "__anon_field_550kzhwee",
+        "type": "union { ... }",
+        "isAnonymous": true,
+        "isUnion": true,
+        "size": 8,
+        "alignment": 8,
+        "offset": 8,
+        "innerFields": [
+          {
+            "name": "u1",
+            "type": "int",
+            "size": 4,
+            "alignment": 4,
+            "offset": 0,
+            "isFlexibleArray": false
+          },
+          {
+            "name": "u2",
+            "type": "double",
+            "size": 8,
+            "alignment": 8,
+            "offset": 0,
+            "isFlexibleArray": false
+          }
+        ],
+        "padding": 0
+      },
+      {
+        "name": "tail",
+        "type": "char",
+        "size": 1,
+        "alignment": 1,
+        "offset": 16,
+        "isFlexibleArray": false,
+        "padding": 0
+      }
+    ],
+    "totalSize": 24,
+    "paddingBytes": 7,
+    "optimizedFields": [
+      {
+        "name": "anon",
+        "type": "struct { ... }",
+        "isAnonymous": true,
+        "isUnion": false,
+        "size": 8,
+        "alignment": 4,
+        "offset": 0,
+        "innerFields": [
+          {
+            "name": "a",
+            "type": "int",
+            "size": 4,
+            "alignment": 4,
+            "offset": 0,
+            "isFlexibleArray": false
+          },
+          {
+            "name": "b",
+            "type": "char",
+            "size": 1,
+            "alignment": 1,
+            "offset": 0,
+            "isFlexibleArray": false
+          }
+        ],
+        "padding": 0
+      },
+      {
+        "name": "__anon_field_550kzhwee",
+        "type": "union { ... }",
+        "isAnonymous": true,
+        "isUnion": true,
+        "size": 8,
+        "alignment": 8,
+        "offset": 8,
+        "innerFields": [
+          {
+            "name": "u1",
+            "type": "int",
+            "size": 4,
+            "alignment": 4,
+            "offset": 0,
+            "isFlexibleArray": false
+          },
+          {
+            "name": "u2",
+            "type": "double",
+            "size": 8,
+            "alignment": 8,
+            "offset": 0,
+            "isFlexibleArray": false
+          }
+        ],
+        "padding": 0
+      },
+      {
+        "name": "tail",
+        "type": "char",
+        "size": 1,
+        "alignment": 1,
+        "offset": 16,
+        "isFlexibleArray": false,
+        "padding": 0
+      }
+    ],
+    "optimizedSize": 24,
+    "memorySaved": 0,
+    "optimizationRatio": 0,
+    "message": "Contains complex types (not optimized)",
+    "sourceMatch": "struct WithAnon {\r\n    struct { int a; char b; } anon;\r\n    union { int u1; double u2; };\r\n    char tail;\r\n};"
+  },
+  {
+    "name": "BitFields",
+    "fields": [
+      {
+        "name": "a",
+        "type": "int",
+        "size": 0,
+        "alignment": 4,
+        "offset": 0,
+        "isBitField": true,
+        "bits": 3,
+        "padding": 0,
+        "bitOffset": 0
+      },
+      {
+        "name": "b",
+        "type": "int",
+        "size": 0,
+        "alignment": 4,
+        "offset": 0,
+        "isBitField": true,
+        "bits": 5,
+        "bitOffset": 3,
+        "padding": 0
+      },
+      {
+        "name": "c",
+        "type": "int",
+        "size": 0,
+        "alignment": 4,
+        "offset": 0,
+        "isBitField": true,
+        "bits": 24,
+        "bitOffset": 8,
+        "padding": 0
+      },
+      {
+        "name": "d",
+        "type": "unsigned long long",
+        "size": 0,
+        "alignment": 8,
+        "offset": 8,
+        "isBitField": true,
+        "bits": 1,
+        "padding": 4,
+        "bitOffset": 0
+      }
+    ],
+    "totalSize": 16,
+    "paddingBytes": 4,
+    "optimizedFields": [
+      {
+        "name": "a",
+        "type": "int",
+        "size": 0,
+        "alignment": 4,
+        "offset": 0,
+        "isBitField": true,
+        "bits": 3,
+        "padding": 0,
+        "bitOffset": 0
+      },
+      {
+        "name": "b",
+        "type": "int",
+        "size": 0,
+        "alignment": 4,
+        "offset": 0,
+        "isBitField": true,
+        "bits": 5,
+        "bitOffset": 3,
+        "padding": 0
+      },
+      {
+        "name": "c",
+        "type": "int",
+        "size": 0,
+        "alignment": 4,
+        "offset": 0,
+        "isBitField": true,
+        "bits": 24,
+        "bitOffset": 8,
+        "padding": 0
+      },
+      {
+        "name": "d",
+        "type": "unsigned long long",
+        "size": 0,
+        "alignment": 8,
+        "offset": 8,
+        "isBitField": true,
+        "bits": 1,
+        "padding": 4,
+        "bitOffset": 0
+      }
+    ],
+    "optimizedSize": 16,
+    "memorySaved": 0,
+    "optimizationRatio": 0,
+    "message": "Contains complex types (not optimized)",
+    "sourceMatch": "struct BitFields {\r\n    int a : 3;\r\n    int b : 5;\r\n    int c : 24; \r\n    int : 0;    \r\n    unsigned long long d : 1; \r\n};"
+  },
+  {
+    "name": "inline_inst",
+    "fields": [
+      {
+        "name": "emb",
+        "type": "struct { ... }",
+        "isAnonymous": true,
+        "isUnion": false,
+        "size": 8,
+        "alignment": 4,
+        "offset": 0,
+        "innerFields": [
+          {
+            "name": "e",
+            "type": "int",
+            "size": 4,
+            "alignment": 4,
+            "offset": 0,
+            "isFlexibleArray": false
+          },
+          {
+            "name": "f",
+            "type": "char",
+            "size": 1,
+            "alignment": 1,
+            "offset": 0,
+            "isFlexibleArray": false
+          }
+        ],
+        "padding": 0
+      }
+    ],
+    "totalSize": 8,
+    "paddingBytes": 0,
+    "optimizedFields": [
+      {
+        "name": "emb",
+        "type": "struct { ... }",
+        "isAnonymous": true,
+        "isUnion": false,
+        "size": 8,
+        "alignment": 4,
+        "offset": 0,
+        "innerFields": [
+          {
+            "name": "e",
+            "type": "int",
+            "size": 4,
+            "alignment": 4,
+            "offset": 0,
+            "isFlexibleArray": false
+          },
+          {
+            "name": "f",
+            "type": "char",
+            "size": 1,
+            "alignment": 1,
+            "offset": 0,
+            "isFlexibleArray": false
+          }
+        ],
+        "padding": 0
+      }
+    ],
+    "optimizedSize": 8,
+    "memorySaved": 0,
+    "optimizationRatio": 0,
+    "message": "Contains complex types (not optimized)",
+    "sourceMatch": "struct InlineDecl { \r\n    struct Embedded { int e; char f; } emb;\r\n} inline_inst;"
+  },
+  {
+    "name": "PackedAttr",
+    "fields": [
+      {
+        "name": "a",
+        "type": "char",
+        "size": 1,
+        "alignment": 1,
+        "offset": 0,
+        "isFlexibleArray": false,
+        "padding": 0
+      },
+      {
+        "name": "b",
+        "type": "int",
+        "size": 4,
+        "alignment": 4,
+        "offset": 1,
+        "isFlexibleArray": false,
+        "padding": 0
+      },
+      {
+        "name": "c",
+        "type": "char",
+        "size": 1,
+        "alignment": 1,
+        "offset": 5,
+        "isFlexibleArray": false,
+        "padding": 0
+      }
+    ],
+    "totalSize": 6,
+    "paddingBytes": 0,
+    "optimizedFields": [
+      {
+        "name": "a",
+        "type": "char",
+        "size": 1,
+        "alignment": 1,
+        "offset": 0,
+        "isFlexibleArray": false,
+        "padding": 0
+      },
+      {
+        "name": "b",
+        "type": "int",
+        "size": 4,
+        "alignment": 4,
+        "offset": 1,
+        "isFlexibleArray": false,
+        "padding": 0
+      },
+      {
+        "name": "c",
+        "type": "char",
+        "size": 1,
+        "alignment": 1,
+        "offset": 5,
+        "isFlexibleArray": false,
+        "padding": 0
+      }
+    ],
+    "optimizedSize": 6,
+    "memorySaved": 0,
+    "optimizationRatio": 0,
+    "message": "Packed struct (not optimized)",
+    "sourceMatch": "struct PackedAttr {\r\n    char a;\r\n    int b;\r\n    char c;\r\n} __attribute__((packed));"
+  },
+  {
+    "name": "U",
+    "fields": [
+      {
+        "name": "s",
+        "type": "struct { ... }",
+        "isAnonymous": true,
+        "isUnion": false,
+        "size": 8,
+        "alignment": 4,
+        "offset": 0,
+        "innerFields": [
+          {
+            "name": "a",
+            "type": "char",
+            "size": 1,
+            "alignment": 1,
+            "offset": 0,
+            "isFlexibleArray": false
+          },
+          {
+            "name": "b",
+            "type": "int",
+            "size": 4,
+            "alignment": 4,
+            "offset": 0,
+            "isFlexibleArray": false
+          }
+        ],
+        "padding": 0
+      },
+      {
+        "name": "d",
+        "type": "double",
+        "size": 8,
+        "alignment": 8,
+        "offset": 0,
+        "isFlexibleArray": false,
+        "padding": 0
+      }
+    ],
+    "totalSize": 8,
+    "paddingBytes": 0,
+    "optimizedFields": [
+      {
+        "name": "s",
+        "type": "struct { ... }",
+        "isAnonymous": true,
+        "isUnion": false,
+        "size": 8,
+        "alignment": 4,
+        "offset": 0,
+        "innerFields": [
+          {
+            "name": "a",
+            "type": "char",
+            "size": 1,
+            "alignment": 1,
+            "offset": 0,
+            "isFlexibleArray": false
+          },
+          {
+            "name": "b",
+            "type": "int",
+            "size": 4,
+            "alignment": 4,
+            "offset": 0,
+            "isFlexibleArray": false
+          }
+        ],
+        "padding": 0
+      },
+      {
+        "name": "d",
+        "type": "double",
+        "size": 8,
+        "alignment": 8,
+        "offset": 0,
+        "isFlexibleArray": false,
+        "padding": 0
+      }
+    ],
+    "optimizedSize": 16,
+    "memorySaved": 0,
+    "optimizationRatio": 0,
+    "message": "Contains complex types (not optimized)",
+    "sourceMatch": "union U {\r\n    struct { char a; int b; } s;\r\n    double d;\r\n};"
+  },
+  {
+    "name": "AlignTest",
+    "fields": [
+      {
+        "name": "a",
+        "type": "char",
+        "size": 1,
+        "alignment": 1,
+        "offset": 0,
+        "isFlexibleArray": false,
+        "padding": 0
+      },
+      {
+        "name": "b",
+        "type": "int",
+        "size": 4,
+        "alignment": 16,
+        "offset": 16,
+        "isFlexibleArray": false,
+        "padding": 15
+      },
+      {
+        "name": "c",
+        "type": "char",
+        "size": 1,
+        "alignment": 1,
+        "offset": 20,
+        "isFlexibleArray": false,
+        "padding": 0
+      }
+    ],
+    "totalSize": 32,
+    "paddingBytes": 26,
+    "optimizedFields": [
+      {
+        "name": "b",
+        "type": "int",
+        "size": 4,
+        "alignment": 16,
+        "offset": 0,
+        "isFlexibleArray": false,
+        "padding": 0
+      },
+      {
+        "name": "a",
+        "type": "char",
+        "size": 1,
+        "alignment": 1,
+        "offset": 4,
+        "isFlexibleArray": false,
+        "padding": 0
+      },
+      {
+        "name": "c",
+        "type": "char",
+        "size": 1,
+        "alignment": 1,
+        "offset": 5,
+        "isFlexibleArray": false,
+        "padding": 0
+      }
+    ],
+    "optimizedSize": 16,
+    "memorySaved": 16,
+    "optimizationRatio": 50,
+    "sourceMatch": "struct AlignTest {\r\n    char a;\r\n    int b __attribute__((aligned(16)));\r\n    char c;\r\n} __attribute__((aligned(8)));"
+  },
+  {
+    "name": "ArrayTest",
+    "fields": [
+      {
+        "name": "matrix",
+        "type": "int",
+        "size": 24,
+        "alignment": 4,
+        "offset": 0,
+        "arraySize": 6,
+        "isFlexibleArray": false,
+        "padding": 0
+      }
+    ],
+    "totalSize": 24,
+    "paddingBytes": 0,
+    "optimizedFields": [
+      {
+        "name": "matrix",
+        "type": "int",
+        "size": 24,
+        "alignment": 4,
+        "offset": 0,
+        "arraySize": 6,
+        "isFlexibleArray": false,
+        "padding": 0
+      }
+    ],
+    "optimizedSize": 24,
+    "memorySaved": 0,
+    "optimizationRatio": 0,
+    "sourceMatch": "struct ArrayTest {\r\n    int matrix[3][2];\r\n};"
+  }
+]

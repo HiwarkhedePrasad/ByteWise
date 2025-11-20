@@ -133,7 +133,8 @@
     }
   },
   "scripts": {
-    "test": "node ./test/extension.test.js"
+    "test": "node ./test/unit/parser.test.js",
+    "test:vscode": "node ./test/extension.test.js"
   },
   "repository": {
     "type": "git",
