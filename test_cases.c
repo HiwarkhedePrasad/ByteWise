@@ -60,3 +60,21 @@ struct AlignTest {
 struct ArrayTest {
     int matrix[3][2];
 };
+
+// 10. Enum with fixed underlying type (uint8_t = 1 byte)
+enum MyEnum : uint8_t { A, B };
+
+struct EnumTest {
+    uint32_t x;       // 4 bytes, offset 0
+    MyEnum enumField; // 1 byte, offset 4, 3 bytes padding after
+    uint32_t y;       // 4 bytes, offset 8
+};  // Total: 12 bytes, 3 bytes padding
+
+// 11. Default enum (should be int size = 4 bytes)
+enum DefaultEnum { C, D };
+
+struct DefaultEnumTest {
+    char a;         // 1 byte, offset 0, 3 bytes padding
+    DefaultEnum e;  // 4 bytes, offset 4
+    char b;         // 1 byte, offset 8, 3 bytes padding
+};  // Total: 12 bytes, 6 bytes padding

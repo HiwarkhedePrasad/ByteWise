@@ -68,7 +68,26 @@ class StructAnalyzer {
         }
     }
 
-    // 1b. Collect struct/union definitions using brace counting
+    // 1b. Collect enum definitions (e.g., enum MyEnum : uint8_t { A, B };)
+    // Handles both fixed underlying type enums and default enums
+    const enumRegex = /\benum\s+(\w+)\s*(?::\s*([\w\s]+))?\s*\{[^}]*\}\s*;/g;
+    let enumMatch;
+    while ((enumMatch = enumRegex.exec(text)) !== null) {
+        const [, enumName, underlyingType] = enumMatch;
+        // If no underlying type specified, default to int (4 bytes, per C++ standard)
+        const baseType = underlyingType ? underlyingType.trim() : 'int';
+        const size = getTypeSize(baseType, 1, this.typeSizes, {});
+        const align = getTypeAlignment(baseType, this.targetAlignment, this.typeSizes, {});
+        
+        this.typeTable[enumName] = { 
+            size: size,
+            align: align,
+            isEnum: true,
+            underlyingType: baseType
+        };
+    }
+
+    // 1c. Collect struct/union definitions using brace counting
     const rawStructs = [];
     let anonCounter = 1;
     
