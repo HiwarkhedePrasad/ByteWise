@@ -1,94 +1,151 @@
-## ByteWise — C/C++ Struct Analyzer for VS Code
+# ByteWise — C/C++ Struct Analyzer for VS Code
 
-ByteWise helps C/C++ developers understand and optimize the memory layout of their `struct`s. It visualizes field sizes, alignment, padding, and suggests reordering to reduce memory usage. An interactive webview shows a byte-accurate layout with quick actions to export, copy, and apply optimized definitions.
+[![VS Code Version](https://img.shields.io/badge/VS%20Code-%5E1.74.0-blue.svg)](https://code.visualstudio.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Version](https://img.shields.io/badge/version-1.3.5-green.svg)](https://github.com/HiwarkhedePrasad/ByteWise)
+
+**ByteWise** is a powerful Visual Studio Code extension designed to help C and C++ developers understand, analyze, and optimize the memory layout of their `struct` and `union` definitions. By visualizing field sizes, alignment requirements, padding bytes, and suggesting optimal field reordering, ByteWise enables developers to reduce memory footprint and improve cache efficiency in performance-critical applications.
+
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [How It Works](#how-it-works)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
 ## Features
 
-- **Struct analysis**: Parse and analyze `struct` definitions to compute field offsets, sizes, alignment, total size, and padding.
-- **Selection and file analysis**: Analyze just your selection or every `struct` in the active file.
-- **Inline hints (hover)**: Hover a struct field to see size and alignment details in-editor.
-- **Optimization diagnostics**: Info diagnostics appear for structs with potential memory savings via reordering.
-- **Interactive webview**: Visual layout, field details, optimized ordering suggestions, and export tools.
-- **Actionable commands**: Copy optimized code, apply it into the editor, and export analysis to Markdown.
-- **Configurable**: Alignment, type sizes (embedded targets), inline hints, themes, and auto-analyze on save.
+### Core Analysis Capabilities
 
-### New: Project Structure with Optimization Status
+| Feature | Description |
+|---------|-------------|
+| **Struct Analysis** | Parse and analyze `struct` and `union` definitions to compute field offsets, sizes, alignment requirements, total size, and padding bytes |
+| **Selection & File Analysis** | Analyze just your selected code or every `struct` in the active file |
+| **Inline Hints (Hover)** | Hover over a struct field to see size, alignment, and array details directly in the editor |
+| **Optimization Diagnostics** | Info diagnostics appear for structs with potential memory savings via field reordering |
+| **Interactive Webview** | Visual byte-accurate layout with field details, optimized ordering suggestions, and export tools |
+| **Actionable Commands** | Copy optimized code, apply it into the editor, and export analysis to Markdown |
 
-- Workspace-aware file tree for C/C++ files relative to your opened VS Code workspace
-- Color-coded file names: green if all structs are optimal (or no structs), red if any struct has savings
-- Click a file name to load its analysis in the webview
-- Apply Optimization replaces the struct definition in-place; reopens the file if needed
+### Project Structure Panel (New in v1.2.3)
+
+The extension now includes a workspace-aware project structure panel that provides:
+
+- **File Tree View**: Displays all C/C++ files relative to your opened VS Code workspace
+- **Color-Coded Status**: 
+  - 🟢 **Green** — All structs are optimal or no structs found
+  - 🔴 **Red** — One or more structs have optimization opportunities
+- **Quick Navigation**: Click a file name to load its analysis in the webview
+- **Apply Optimization**: Replaces struct definitions in-place; reopens the file if needed
 
 ---
 
 ## Installation
 
-### From the VS Code Marketplace
+### From VS Code Marketplace
 
-1. Open VS Code.
-2. Go to the Extensions view (`Ctrl+Shift+X` or `Cmd+Shift+X`).
-3. Search for "ByteWise - C/C++ Struct Analyzer".
-4. Click Install.
+1. Open Visual Studio Code
+2. Navigate to the Extensions view (`Ctrl+Shift+X` or `Cmd+Shift+X`)
+3. Search for **"ByteWise - C/C++ Struct Analyzer"**
+4. Click **Install**
 
-### From source
+### From Source
 
-1. Clone the repository.
-2. Run `npm install`.
-3. Open the folder in VS Code.
-4. Press F5 to launch an Extension Development Host.
+```bash
+# Clone the repository
+git clone https://github.com/HiwarkhedePrasad/ByteWise.git
 
-### Usage
+# Navigate to the project directory
+cd ByteWise
 
-Once installed and activated, ByteWise automatically provides features when working with C/C++ files.
+# Install dependencies
+npm install
+```
 
-#### Analyzing Structs
+Then open the folder in VS Code and press **F5** to launch an Extension Development Host for testing.
+
+---
+
+## Usage
+
+Once installed and activated, ByteWise automatically provides features when working with C/C++ files (`.c`, `.cpp`, `.h`, `.hpp`).
+
+### Analyzing Structs
 
 You can analyze structs in several ways:
 
-- **Analyze All Structs in File**: Command Palette → “ByteWise: Analyze All Structs in File”.
-- **Analyze Selected Struct**: Select struct definitions → Command Palette → “ByteWise: Analyze Selected Struct”.
-- **Analyze Struct Layout**: Command Palette → “ByteWise: Analyze Struct Layout” (also in editor title bar).
-- **Context Menu**: Right-click within C/C++ files to access ByteWise actions.
+| Method | Description |
+|--------|-------------|
+| **Command Palette** | Press `Ctrl+Shift+P` → Type "ByteWise" → Select a command |
+| **Editor Title Bar** | Click the analysis icon in the editor title bar |
+| **Context Menu** | Right-click within C/C++ files to access ByteWise actions |
+| **Auto-Analysis** | Automatically analyzes on file save (configurable) |
 
-#### Inline Hints
+#### Available Commands
 
-- Hover a struct field line to see its size, alignment, and array details (if any).
+| Command | Description |
+|---------|-------------|
+| `ByteWise: Analyze Struct Layout` | Analyze and display the struct layout in the webview |
+| `ByteWise: Analyze Selected Struct` | Analyze only the selected struct definition |
+| `ByteWise: Analyze All Structs in File` | Analyze every struct in the current file |
+| `ByteWise: ByteWise Settings` | Open extension settings |
 
-#### Optimization Diagnostics
+### Inline Hints
 
-- Info diagnostics appear under struct declarations with potential memory savings from reordering. Hover for details.
+Hover over any struct field line to see detailed information:
 
-#### Project Structure Panel
+- **Size**: Memory size in bytes
+- **Alignment**: Alignment requirement in bytes
+- **Array Details**: Array size and element size (if applicable)
 
-- The analysis view includes a Project Structure section listing relevant C/C++ files.
-- File names are colored by status: green for optimal/no-structs, red if optimizations are available.
-- Click a file name to show its analysis right in the webview.
+### Optimization Diagnostics
 
-#### Apply Optimization
+Info diagnostics appear under struct declarations with potential memory savings. Hover over the diagnostic to see:
+- Number of bytes that can be saved
+- Percentage reduction in memory usage
 
-- Replaces the original `struct` definition in-place (supports both `struct Name { ... };` and `typedef struct { ... } Name;`). If the file isn’t open, it’s reopened automatically.
+### Project Structure Panel
+
+The analysis view includes a **Project Structure** section:
+1. Lists all relevant C/C++ files in your workspace
+2. Color-codes files by optimization status
+3. Click any file name to show its analysis in the webview
+
+### Apply Optimization
+
+The **Apply Optimization** feature:
+- Replaces the original `struct` definition in-place
+- Supports both `struct Name { ... };` and `typedef struct { ... } Name;` formats
+- Automatically reopens the file if needed
 
 ---
 
 ## Configuration
 
-You can customize ByteWise's behavior through VS Code settings:
+Customize ByteWise through VS Code settings:
 
-1.  Go to `File` > `Preferences` > `Settings` (`Code` > `Preferences` > `Settings` on macOS).
-2.  Search for "ByteWise".
+1. Go to `File` > `Preferences` > `Settings` (`Code` > `Preferences` > `Settings` on macOS)
+2. Search for **"ByteWise"**
 
-Available settings (see also `package.json` contributes → configuration):
+### Available Settings
 
-- `bytewise.targetAlignment` (number, default 8): Target platform alignment (4 or 8).
-- `bytewise.showOptimizations` (boolean, default true): Show optimization diagnostics.
-- `bytewise.customTypeSizes` (object): Custom type sizes for embedded targets (e.g., `{ "int": 2, "long": 4 }`).
-- `bytewise.showInlineHints` (boolean, default true): Enable inline hover hints.
-- `bytewise.colorTheme` (string, default "default"): `default` | `colorblind` | `high-contrast`.
-- `bytewise.analyzeOnSave` (boolean, default true): Re-analyze automatically on save.
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `bytewise.targetAlignment` | number | `8` | Target platform alignment (4 or 8 bytes) |
+| `bytewise.showOptimizations` | boolean | `true` | Show struct optimization suggestions |
+| `bytewise.customTypeSizes` | object | `{}` | Custom type sizes for embedded targets |
+| `bytewise.showInlineHints` | boolean | `true` | Show inline hover hints for struct fields |
+| `bytewise.colorTheme` | string | `"default"` | Color theme: `default`, `colorblind`, or `high-contrast` |
+| `bytewise.analyzeOnSave` | boolean | `true` | Re-analyze automatically on save |
 
-Example `settings.json`:
+### Example Configuration
 
 ```json
 {
@@ -104,95 +161,231 @@ Example `settings.json`:
 }
 ```
 
-Supported languages: C and C++ (`.c`, `.cpp`, `.h`, `.hpp`).
+### Supported Languages
+
+- C (`.c`, `.h`)
+- C++ (`.cpp`, `.hpp`)
 
 ---
 
-## How it works (high level)
+## How It Works
 
-- Cleans source (removes comments and directives) and locates `struct` definitions.
-- Parses fields, computing sizes and alignments using a configurable type table.
-- Builds a byte-accurate layout with offsets and padding; proposes a reordered variant to reduce padding.
-- Renders a webview visualization; actions allow copying/applying optimized code and exporting Markdown reports.
+ByteWise performs struct analysis through the following steps:
 
-All analysis runs locally inside VS Code; no code is sent externally.
+```
+┌─────────────────────┐
+│  Source Code Input  │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ Clean Source Code   │  ← Remove comments and preprocessor directives
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ Locate Structs      │  ← Find struct/union definitions
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ Parse Fields        │  ← Extract type, name, arrays, bitfields
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ Compute Layout      │  ← Calculate offsets, alignment, padding
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ Optimize Ordering   │  ← Propose reordered variant to reduce padding
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ Render Webview      │  ← Visual layout with actions
+└─────────────────────┘
+```
+
+**Key Points:**
+- All analysis runs **locally** inside VS Code
+- **No code is sent externally** — your source code remains private
+- Uses a configurable type table for size and alignment calculations
 
 ---
 
 ## Development
 
-Prerequisites: Node.js, npm, and VS Code ≥ 1.74.
+### Prerequisites
 
-1. Fork and clone the repo.
-2. `npm install`.
-3. Open the project in VS Code.
-4. Press F5 to launch the Extension Development Host.
+- Node.js (v14 or higher)
+- npm (v6 or higher)
+- Visual Studio Code (≥ 1.74.0)
 
-Run tests:
+### Setup
 
 ```bash
+# Fork and clone the repository
+git clone https://github.com/YOUR_USERNAME/ByteWise.git
+cd ByteWise
+
+# Install dependencies
+npm install
+
+# Open in VS Code
+code .
+```
+
+Press **F5** to launch the Extension Development Host.
+
+### Running Tests
+
+```bash
+# Run unit tests
 npm test
+
+# Run VS Code integration tests
+npm run test:vscode
 ```
 
-Project structure (high level):
+### Project Structure
 
-```text
-src/
-  constants.js
-  structAnalyzer.js
-  webViewProvider.js
-  generators/
-    htmlGenerator.js
-    markdownGenerator.js
-  parsers/
-    fieldParser.js
-  utils/
-    typeUtils.js
-    layoutUtils.js
-
-Media assets for the marketplace should live in `media/` (e.g., `media/analysis.png`, `media/project-tree.png`). Add screenshots/GIFs and reference them below.
-
-## Screenshots
-
-Place images in `media/`:
-
-![Analysis View](media/analysis.png)
-![Project Tree](media/project-tree.png)
-
-## Commands
-
-- ByteWise: Analyze Struct Layout (`bytewise.analyzeStruct`)
-- ByteWise: Analyze Selected Struct (`bytewise.analyzeSelection`)
-- ByteWise: Analyze All Structs in File (`bytewise.analyzeFile`)
-- ByteWise: ByteWise Settings (`bytewise.openSettings`)
+```
+ByteWise/
+├── extension.js              # Main entry point
+├── package.json              # Extension manifest
+├── jsconfig.json             # JavaScript configuration
+├── eslint.config.mjs         # ESLint configuration
+├── src/
+│   ├── constants.js          # Extension constants
+│   ├── structAnalyzer.js     # Core analysis logic
+│   ├── webViewProvider.js    # Webview management
+│   ├── generators/
+│   │   ├── htmlGenerator.js  # HTML output generation
+│   │   └── markdownGenerator.js # Markdown export
+│   ├── parsers/
+│   │   └── fieldParser.js    # Field parsing logic
+│   ├── templates/
+│   │   └── webviewTemplate.js # Webview HTML templates
+│   └── utils/
+│       ├── index.js          # Utility exports
+│       ├── layoutUtils.js    # Layout calculations
+│       ├── typeUtils.js      # Type size/alignment
+│       └── warningUtils.js   # Warning generation
+├── test/
+│   ├── extension.test.js     # Extension tests
+│   └── unit/
+│       ├── enum.test.js      # Enum tests
+│       └── parser.test.js    # Parser tests
+├── resources/
+│   └── icon.png              # Extension icon
+└── media/                    # Screenshots and media assets
 ```
 
-See `CHANGELOG.md` for notable updates.
+---
+
+## Supported Struct Types
+
+ByteWise handles various C/C++ struct features:
+
+| Feature | Support |
+|---------|---------|
+| Basic types (int, char, float, etc.) | ✅ |
+| Pointers | ✅ |
+| Arrays (single & multi-dimensional) | ✅ |
+| Bitfields | ✅ |
+| Anonymous structs/unions | ✅ |
+| Nested structs | ✅ |
+| Unions | ✅ |
+| `#pragma pack` | ✅ |
+| `__attribute__((packed))` | ✅ |
+| `__attribute__((aligned))` | ✅ |
+| Flexible array members | ✅ |
+| Enums (default & fixed underlying type) | ✅ |
+| Typedef structs | ✅ |
 
 ---
 
 ## Contributing
 
-We welcome contributions!
+We welcome contributions! Here's how to get started:
 
-1. Open an issue to discuss bugs or enhancements.
-2. Create a feature branch from `main`.
-3. Keep edits focused and readable; add tests when reasonable.
-4. Ensure `npm test` passes and address lint warnings.
-5. Open a PR with a clear description and screenshots/GIFs for UI changes.
+### Getting Started
 
-Guidelines:
+1. **Open an issue** to discuss bugs or enhancements
+2. **Fork the repository** and create a feature branch from `main`
+3. **Make focused, readable changes** with appropriate tests
+4. **Run tests**: Ensure `npm test` passes and address lint warnings
+5. **Submit a PR** with a clear description and screenshots/GIFs for UI changes
 
-- Favor explicit naming and early returns; avoid deep nesting.
-- Keep UX simple and accessible (colorblind and high-contrast modes available).
-- Do not add telemetry or send any user code externally.
+### Guidelines
 
-If uncertain, open a Draft PR early for feedback.
+- Use explicit naming and early returns; avoid deep nesting
+- Keep UX simple and accessible
+- Support colorblind and high-contrast themes
+- **Do not add telemetry** or send any user code externally
+
+If uncertain, open a **Draft PR** early for feedback.
+
+---
+
+## Changelog
+
+See [CHANGELOG.md](https://github.com/HiwarkhedePrasad/ByteWise/blob/main/CHANGELOG.md) for notable updates.
+
+### Recent Changes (v1.2.3)
+
+- **Added**: Workspace Project Structure panel with clickable files and color-coded optimization status
+- **Changed**: Apply Optimization replaces struct definitions in-place
+- **Changed**: File names shown relative to workspace
+- **Fixed**: Bitfield code generation order
+- **Fixed**: Pointer size/alignment for function pointers respects configuration
 
 ---
 
 ## License
 
-MIT — see `LICENSE.md`.
+This project is licensed under the MIT License — see the [LICENSE.md](https://github.com/HiwarkhedePrasad/ByteWise/blob/main/LICENSE.md) file for details.
+
+```
+MIT License
+
+Copyright (c) 2025 Prasad Hiwarkhede
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+```
 
 ---
+
+## Author
+
+**Prasad Hiwarkhede**
+
+- GitHub: [@HiwarkhedePrasad](https://github.com/HiwarkhedePrasad)
+- Repository: [ByteWise](https://github.com/HiwarkhedePrasad/ByteWise)
+
+---
+
+## Support
+
+If you encounter any issues or have suggestions:
+
+1. Check the [Issues](https://github.com/HiwarkhedePrasad/ByteWise/issues) page
+2. Open a new issue with:
+   - VS Code version
+   - ByteWise version
+   - Steps to reproduce
+   - Expected vs. actual behavior
+
+---
+
+**Happy Coding! Optimize your memory layouts with ByteWise.**
