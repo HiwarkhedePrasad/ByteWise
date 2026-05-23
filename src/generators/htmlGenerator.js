@@ -357,7 +357,7 @@ function generateWebviewContent(structs, fileName, workspaceTree) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ByteWise Analysis</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Caveat:wght@500;700&family=Cousine:wght@400;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
     <style>
         ${getWebviewStyles()}
     </style>
