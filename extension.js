@@ -2,6 +2,7 @@ const vscode = require("vscode");
 const { StructAnalyzer } = require("./src/structAnalyzer");
 const { StructTreeProvider } = require("./src/treeProvider");
 const { EditorDecorations } = require("./src/editorDecorations");
+const { LayoutWebview } = require("./src/layoutWebview");
 const {
   COMMANDS,
   SUPPORTED_LANGUAGES,
@@ -18,6 +19,7 @@ function activate(context) {
   const analyzer = new StructAnalyzer();
   const treeProvider = new StructTreeProvider();
   const decorations = new EditorDecorations();
+  const layoutWebview = new LayoutWebview(context.extensionUri);
 
   const diagnosticCollection =
     vscode.languages.createDiagnosticCollection(EXTENSION_NAME);
@@ -208,6 +210,19 @@ function activate(context) {
     }
   );
 
+  const viewLayoutCommand = vscode.commands.registerCommand(
+    "bytewise.viewLayout",
+    async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        vscode.window.showErrorMessage("No active editor found");
+        return;
+      }
+      const structs = analyzeDocument(editor.document) || [];
+      layoutWebview.show(structs, editor.document.fileName);
+    }
+  );
+
   const settingsCommand = vscode.commands.registerCommand(
     COMMANDS.OPEN_SETTINGS,
     () => {
@@ -364,6 +379,7 @@ function activate(context) {
     analyzeFileCommand,
     settingsCommand,
     applyOptimizationCommand,
+    viewLayoutCommand,
     hoverProvider,
     diagnosticCollection,
     changeDisposable,
