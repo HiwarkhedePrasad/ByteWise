@@ -98,7 +98,9 @@ function activate(context) {
   /**
    * Refresh status bar + sidebar tree + decorations from parsed structs
    */
+  let lastDocument = undefined;
   function refreshUI(document, structs) {
+    lastDocument = document;
     const totalPadding = structs.reduce(
       (sum, s) => sum + (s.paddingBytes || 0),
       0
@@ -236,7 +238,17 @@ function activate(context) {
   const applyOptimizationCommand = vscode.commands.registerCommand(
     "bytewise.applyOptimization",
     async (item) => {
-      const editor = vscode.window.activeTextEditor;
+      let editor = vscode.window.activeTextEditor;
+      if (!editor && lastDocument) {
+        try {
+          editor = await vscode.window.showTextDocument(lastDocument, {
+            preview: false,
+            preserveFocus: true,
+          });
+        } catch (e) {
+          editor = undefined;
+        }
+      }
       if (!editor) {
         vscode.window.showErrorMessage(
           "Open the source file before applying an optimization"
