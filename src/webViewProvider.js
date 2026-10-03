@@ -1,5 +1,6 @@
 const vscode = require("vscode");
 const path = require("path");
+const fs = require("fs").promises;
 const { generateWebviewContent } = require("./generators/htmlGenerator");
 const { StructAnalyzer } = require("./structAnalyzer");
 const { generateMarkdownReport } = require("./generators/markdownGenerator");
@@ -22,6 +23,7 @@ class WebViewProvider {
     this.panel = undefined;
     this.preserveFocus = false;
     this.analyzer = new StructAnalyzer();
+    this.workspaceStatusCache = new Map();
   }
 
   /**
@@ -180,14 +182,9 @@ class WebViewProvider {
       return;
     }
 
-    const choice = await vscode.window.showInformationMessage(
-      `Apply optimization for struct ${structName}?`,
-      { modal: true },
-      "Yes",
-      "No"
-    );
-
-    if (choice === "Yes") {
+    // Apply directly (fully undoable with Ctrl+Z) instead of interrupting
+    // the user with a modal confirmation dialog.
+    {
       const range = this.findStructRange(editor.document, structName);
       if (range) {
         await editor.edit((editBuilder) => {
@@ -200,9 +197,16 @@ class WebViewProvider {
           editBuilder.insert(position, "\n" + optimizedCode + "\n");
         });
       }
-      vscode.window.showInformationMessage(
-        `✨ Optimized struct ${structName} applied!`
-      );
+      vscode.window
+        .showInformationMessage(
+          `Optimized struct ${structName} applied.`,
+          "Undo"
+        )
+        .then((choice) => {
+          if (choice === "Undo") {
+            vscode.commands.executeCommand("undo");
+          }
+        });
     }
   }
 
@@ -439,19 +443,34 @@ class WebViewProvider {
         folders: [],
         files: [],
       };
-      const analyzeFileStatus = async (relPath) => {
+      const statusFor = async (relPath) => {
+        const cacheKey = path.join(rootPath, relPath);
         try {
-          const fileUri = vscode.Uri.file(path.join(rootPath, relPath));
-          const doc = await vscode.workspace.openTextDocument(fileUri);
-          const structs = this.analyzer.parseStructs(doc.getText());
-          if (structs.length === 0)
-            return { hasStructs: false, isOptimized: true };
-          const hasSavings = structs.some((s) => (s.memorySaved || 0) > 0);
-          return { hasStructs: true, isOptimized: !hasSavings };
+          const stat = await fs.stat(cacheKey);
+          const cached = this.workspaceStatusCache.get(cacheKey);
+          if (cached && cached.mtimeMs === stat.mtimeMs) {
+            return cached.status;
+          }
+          const text = await fs.readFile(cacheKey, "utf8");
+          const structs = this.analyzer.parseStructs(text);
+          let status;
+          if (structs.length === 0) {
+            status = { hasStructs: false, isOptimized: true };
+          } else {
+            const hasSavings = structs.some((s) => (s.memorySaved || 0) > 0);
+            status = { hasStructs: true, isOptimized: !hasSavings };
+          }
+          this.workspaceStatusCache.set(cacheKey, {
+            mtimeMs: stat.mtimeMs,
+            status,
+          });
+          return status;
         } catch {
           return { hasStructs: false, isOptimized: false };
         }
       };
+
+      const analyzeFileStatus = async (relPath) => statusFor(relPath);
 
       const walkBuild = async (nodeObj, nodeMap, relBase, depth) => {
         const entries = Object.entries(nodeMap || {});

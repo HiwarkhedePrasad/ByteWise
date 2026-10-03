@@ -32,41 +32,33 @@ function generateMemoryLayout(fields, totalSize) {
   let currentOffset = 0;
 
   fields.forEach((field) => {
-    // Add padding blocks if any
+    // Add one padding block for the gap before this field
     if (field.offset > currentOffset) {
       const padding = field.offset - currentOffset;
-      for (let i = 0; i < padding; i++) {
-        layoutBlocks.push(
-          `<div class="memory-block padding-block" data-info="Padding Byte" data-tooltip="Padding byte added for alignment"></div>`
-        );
-      }
-    }
-    // Add field blocks
-    for (let i = 0; i < field.size; i++) {
       layoutBlocks.push(
-        `<div class="memory-block field-block" 
-          data-info="${escapeHtml(field.name)}" 
-          data-tooltip="<strong>${escapeHtml(field.name)}</strong><br/>
-          Type: ${escapeHtml(field.type)}<br/>
-          Size: ${field.size} bytes<br/>
-          Offset: ${field.offset} bytes<br/>
-          Alignment: ${field.alignment} bytes"
-          style="--field-color: hsl(${
-            (field.name.charCodeAt(0) * 137) % 360
-          }, 70%, 85%)"></div>`
+        `<div class="memory-block padding-block" style="flex-grow:${padding}" data-info="Padding Byte" data-tooltip="${padding} padding byte(s) added for alignment"></div>`
       );
     }
+    // One block per field, sized proportionally to its byte size
+    layoutBlocks.push(
+      `<div class="memory-block field-block" style="flex-grow:${field.size}; --field-color: hsl(${
+        (field.name.charCodeAt(0) * 137) % 360
+      }, 70%, 85%)" data-info="${escapeHtml(field.name)}"
+        data-tooltip="<strong>${escapeHtml(field.name)}</strong><br/>
+        Type: ${escapeHtml(field.type)}<br/>
+        Size: ${field.size} bytes<br/>
+        Offset: ${field.offset} bytes<br/>
+        Alignment: ${field.alignment} bytes"></div>`
+    );
     currentOffset = field.offset + field.size;
   });
 
-  // Add trailing padding if any
+  // One block for trailing padding
   if (totalSize > currentOffset) {
     const trailingPadding = totalSize - currentOffset;
-    for (let i = 0; i < trailingPadding; i++) {
-      layoutBlocks.push(
-        `<div class="memory-block padding-block" data-info="Trailing Padding" data-tooltip="Trailing padding to align struct size"></div>`
-      );
-    }
+    layoutBlocks.push(
+      `<div class="memory-block padding-block" style="flex-grow:${trailingPadding}" data-info="Trailing Padding" data-tooltip="${trailingPadding} trailing padding byte(s) to align struct size"></div>`
+    );
   }
 
   return layoutBlocks.join("");
@@ -357,7 +349,7 @@ function generateWebviewContent(structs, fileName, workspaceTree) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ByteWise Analysis</title>
-    <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Caveat:wght@500;700&family=Cousine:wght@400;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';">
     <style>
         ${getWebviewStyles()}
     </style>
@@ -402,7 +394,7 @@ function generateWebviewContent(structs, fileName, workspaceTree) {
         
         // Set global data for the current analysis
         currentStructs = ${JSON.stringify(structs)};
-        currentFileName = '${escapeHtml(fileName)}';
+        currentFileName = ${JSON.stringify(fileName)};
     </script>
 </body>
 </html>`;

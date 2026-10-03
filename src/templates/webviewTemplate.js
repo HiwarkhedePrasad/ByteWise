@@ -27,8 +27,8 @@ function getWebviewStyles() {
       --sketch-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
       --hard-shadow: 4px 4px 0 #000;
 
-      --font-hand: 'Kalam', 'Architects Daughter', 'Caveat', 'Segoe Print', cursive;
-      --font-mono: 'Cousine', 'Roboto Mono', 'Courier New', monospace;
+      --font-hand: 'Segoe Print', 'Comic Sans MS', 'Kalam', cursive;
+      --font-mono: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
     }
 
     * {
@@ -348,15 +348,16 @@ function getWebviewStyles() {
     }
 
     .layout-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, 24px);
+      display: flex;
+      flex-wrap: wrap;
       gap: 4px;
-      justify-content: center;
+      min-height: 36px;
     }
 
     .memory-block {
-      width: 24px;
-      height: 24px;
+      flex-basis: 0;
+      min-width: 28px;
+      height: 32px;
       border: 2px solid var(--ink);
       border-radius: 7px 11px 8px 10px / 9px 8px 11px 7px;
       cursor: pointer;
@@ -650,13 +651,12 @@ function getWebviewStyles() {
       }
 
       .layout-grid {
-        grid-template-columns: repeat(auto-fill, 20px);
         gap: 3px;
       }
 
       .memory-block {
-        width: 20px;
-        height: 20px;
+        min-width: 22px;
+        height: 26px;
       }
 
       .button-group {
